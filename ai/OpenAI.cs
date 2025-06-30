@@ -1,4 +1,4 @@
-// Version: 1.0.0.580
+// Version: 1.0.0.591
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,7 +12,7 @@ using System.Net;
 using System.Text.Json;
 using System.IO;
 using ThmdPlayer.Core.configuration;
-using ThmdPlayer.Core.Logs;
+using ThmdPlayer.Core.logs;
 
 namespace ThmdPlayer.Core.ai
 {
@@ -32,7 +32,7 @@ namespace ThmdPlayer.Core.ai
 
         private static AuthenticationHeaderValue _requestHeader = new HttpClient().DefaultRequestHeaders.Authorization;
         
-        private static ThmdPlayer.Core.Logs.AsyncLogger _logger = new ThmdPlayer.Core.Logs.AsyncLogger();
+        private static AsyncLogger _logger = new AsyncLogger();
 
         private static HttpClient _httpClient = new HttpClient();
 
@@ -42,7 +42,7 @@ namespace ThmdPlayer.Core.ai
 
             // Ustawienia HttpClient (jeśli potrzebne)
             _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-            _logger.Log(Logs.LogLevel.Info, new[] { "Console", "File" }, $"Ustawienia HttpClient: {_httpClient.DefaultRequestHeaders.Accept}");
+            _logger.Log(LogLevel.Info, new[] { "Console", "File" }, $"Ustawienia HttpClient: {_httpClient.DefaultRequestHeaders.Accept}");
 
             Test().Wait(); // Czekamy na zakończenie metody Test
         }
@@ -67,10 +67,10 @@ namespace ThmdPlayer.Core.ai
             _logger.AddSink(new CategoryFilterSink(
                 new ConsoleSink(formatter: new TextFormatter()), new[] { "Console" }));
 
-            _logger.Log(Core.Logs.LogLevel.Info, "File", $"Save to log files");
-            _logger.Log(Core.Logs.LogLevel.Info, "Console", "Console logs just started.");
-            _logger.Log(Core.Logs.LogLevel.Info, "File", _logger.GetMetrics().ToString());
-            _logger.Log(Core.Logs.LogLevel.Info, "Console", _logger.GetMetrics().ToString());
+            _logger.Log(LogLevel.Info, "File", $"Save to log files");
+            _logger.Log(LogLevel.Info, "Console", "Console logs just started.");
+            _logger.Log(LogLevel.Info, "File", _logger.GetMetrics().ToString());
+            _logger.Log(LogLevel.Info, "Console", _logger.GetMetrics().ToString());
         }
 
         public async Task Test()
@@ -78,17 +78,17 @@ namespace ThmdPlayer.Core.ai
             var ai_api_key_environment = Environment.GetEnvironmentVariable("AI_API_KEY");
             if (String.IsNullOrEmpty(ai_api_key_environment))
             {
-                _logger.Log(Logs.LogLevel.Info, new[] { "Console", "File" }, $"Tworze AI_API_KEY w zmiennych środowiskowych");
+                _logger.Log(LogLevel.Info, new[] { "Console", "File" }, $"Tworze AI_API_KEY w zmiennych środowiskowych");
                 Environment.SetEnvironmentVariable("AI_API_KEY", "");
             }
             ai_api_key_environment = Environment.GetEnvironmentVariable("AI_API_KEY");
             _apiKey = ai_api_key_environment;
-            _logger.Log(Logs.LogLevel.Info, new[] { "Console", "File" }, $"Zmienna środowskowa AI_API_KEY: {ai_api_key_environment}");
+            _logger.Log(LogLevel.Info, new[] { "Console", "File" }, $"Zmienna środowskowa AI_API_KEY: {ai_api_key_environment}");
             //Environment.SetEnvironmentVariable("AI_API_KEY", _apiKey);
 
             if (string.IsNullOrEmpty(_apiKey))
             {
-                _logger.Log(Logs.LogLevel.Info, new[] { "Console", "File" }, $"Błąd: Klucz API nie został ustawiony. Ustaw zmienną środowiskową AI_API_KEY.");
+                _logger.Log(LogLevel.Info, new[] { "Console", "File" }, $"Błąd: Klucz API nie został ustawiony. Ustaw zmienną środowiskową AI_API_KEY.");
                 return;
             }
 
@@ -100,15 +100,15 @@ namespace ThmdPlayer.Core.ai
             // Dla OpenAI (klucz często jest w URL lub innym nagłówku - sprawdź dokumentację):
             // Niektóre API mogą wymagać innych nagłówków, np. Content-Type jest dodawany później.
 
-            _logger.Log(Logs.LogLevel.Info, new[] { "Console", "File" }, $"{h}");
+            _logger.Log(LogLevel.Info, new[] { "Console", "File" }, $"{h}");
             string userInput = $"Odpowiedz na moje pytanie: Co myslisz o programie do wideo w C#?";
-            _logger.Log(Logs.LogLevel.Info, new[] { "Console", "File" }, $"{userInput}");
+            _logger.Log(LogLevel.Info, new[] { "Console", "File" }, $"{userInput}");
 
             try
             {
                 Console.WriteLine($"{userInput}");
                 string aiResponse = await GetAiResponse(userInput);
-                _logger.Log(Logs.LogLevel.Info, new[] { "Console", "File" }, $"{aiResponse}");
+                _logger.Log(LogLevel.Info, new[] { "Console", "File" }, $"{aiResponse}");
                 //Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("\nOdpowiedź AI:");
                 Console.WriteLine(aiResponse);
@@ -119,7 +119,7 @@ namespace ThmdPlayer.Core.ai
             catch (Exception ex)
             {
                 Console.ForegroundColor = ConsoleColor.Red;
-                _logger.Log(Logs.LogLevel.Error, new[] { "Console", "File" }, $"\nWystąpił błąd: {ex.Message}");
+                _logger.Log(LogLevel.Error, new[] { "Console", "File" }, $"\nWystąpił błąd: {ex.Message}");
                 // W bardziej rozbudowanej aplikacji loguj szczegły błędu (ex.ToString())
                 //Console.ResetColor();
                 Console.WriteLine("\n---");
@@ -160,7 +160,7 @@ namespace ThmdPlayer.Core.ai
 
             // Serializacja obiektu C# do JSON
             string jsonPayload = System.Text.Json.JsonSerializer.Serialize(requestData);
-            _logger.Log(Logs.LogLevel.Info, new[] { "Console", "File" }, $"{requestData}");
+            _logger.Log(LogLevel.Info, new[] { "Console", "File" }, $"{requestData}");
             var httpContent = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
 
             // --- Wysłanie żądania POST ---
@@ -195,7 +195,7 @@ namespace ThmdPlayer.Core.ai
                 else
                 {
                     // Jeśli struktura jest inna, logujemy całą odpowiedź do analizy
-                    _logger.Log(Logs.LogLevel.Info, new[] { "Console", "File" }, $"Nieoczekiwana struktura odpowiedzi JSON:");
+                    _logger.Log(LogLevel.Info, new[] { "Console", "File" }, $"Nieoczekiwana struktura odpowiedzi JSON:");
                     Console.WriteLine(responseContent);
                     return "Nie udało się przetworzyć odpowiedzi AI.";
                 }

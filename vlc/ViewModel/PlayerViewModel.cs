@@ -1,4 +1,4 @@
-// Version: 1.0.0.585
+// Version: 1.0.0.596
 using Microsoft.Win32;
 using System;
 using System.Collections.Generic;

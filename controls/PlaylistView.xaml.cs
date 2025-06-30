@@ -1,4 +1,4 @@
-// Version: 1.0.0.663
+// Version: 1.0.0.674
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -13,6 +13,7 @@ using ThmdPlayer.Core.Interfaces;
 using ThmdPlayer.Core.medias;
 using ThmdPlayer.Core.controls;
 using System.IO;
+using ThmdPlayer.Core.logs;
 
 namespace ThmdPlayer.Core.controls
 {
@@ -202,7 +203,7 @@ namespace ThmdPlayer.Core.controls
 
         private void PlaylistView_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
-            Logger.Log.Log(Core.Logs.LogLevel.Info, new string[] { "Console" }, "PlaylistView mouse double click event triggered.");
+            Logger.Log.Log(LogLevel.Info, new string[] { "Console" }, "PlaylistView mouse double click event triggered.");
         }
 
         /// <summary>
@@ -242,7 +243,7 @@ namespace ThmdPlayer.Core.controls
                 column.Header = item;
                 column.DisplayMemberBinding = new Binding(item);
                 column.Width = item.Length * 10;
-                Logger.Log.Log(Core.Logs.LogLevel.Info, "Console", $"Adding column {column} for playlist.");
+                Logger.Log.Log(LogLevel.Info, "Console", $"Adding column {column} for playlist.");
                 this._gridView.Columns.Add(column);
             }
 
@@ -263,14 +264,14 @@ namespace ThmdPlayer.Core.controls
                 item.MouseDoubleClick += OnPlaylistItemMouseDoubleClick;
                 item.MouseDown += OnListItemMouseClick;
 
-                Logger.Log.Log(Core.Logs.LogLevel.Info, "Console", $"Add media: {media.Name} to playlist.");
+                Logger.Log.Log(LogLevel.Info, "Console", $"Add media: {media.Name} to playlist.");
 
                 return item;
             }
             catch (Exception ex)
             {
-                Logger.Log.Log(Core.Logs.LogLevel.Error, "Console", $"{ex.Message}");
-                Logger.Log.Log(Logs.LogLevel.Warning, new[] { "Console", "File" }, $"Create file:");
+                Logger.Log.Log(LogLevel.Error, "Console", $"{ex.Message}");
+                Logger.Log.Log(LogLevel.Warning, new[] { "Console", "File" }, $"Create file:");
                 
                 if (!File.Exists("download/local_copy.m3u8"))
                 {

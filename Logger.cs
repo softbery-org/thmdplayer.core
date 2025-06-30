@@ -1,11 +1,11 @@
-// Version: 1.0.0.662
+// Version: 1.0.0.673
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ThmdPlayer.Core.configuration;
-using ThmdPlayer.Core.Logs;
+using ThmdPlayer.Core.logs;
 
 namespace ThmdPlayer.Core
 {
@@ -15,7 +15,7 @@ namespace ThmdPlayer.Core
     public static class Logger
     {
         private static List<string> _categories = new List<string> { "Console", "File" };
-        private static Core.Logs.AsyncLogger _log { get; set; } = new AsyncLogger();
+        private static Core.logs.AsyncLogger _log { get; set; } = new AsyncLogger();
 
         /// <summary>
         /// Gets or sets the configuration instance.
@@ -24,7 +24,7 @@ namespace ThmdPlayer.Core
         /// <summary>
         /// Gets or sets the logger instance.
         /// </summary>
-        public static Core.Logs.AsyncLogger Log { get => _log; set => _log = value; }
+        public static Core.logs.AsyncLogger Log { get => _log; set => _log = value; }
 
         /// <summary>
         /// Initializes the logger with the specified configuration.
@@ -58,7 +58,7 @@ namespace ThmdPlayer.Core
         /// <param name="message">Log message</param>
         /// <param name="category">Array of category</param>
         /// <param name="exception">Exception</param>
-        public static void AddLog(Core.Logs.LogLevel level, string message, string[] category = null, Exception exception = null)
+        public static void AddLog(Core.logs.LogLevel level, string message, string[] category = null, Exception exception = null)
         {
             //if (category != null)
             // _categories.AddRange(category);

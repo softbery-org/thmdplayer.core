@@ -1,4 +1,4 @@
-// Version: 1.0.0.461
+// Version: 1.0.0.472
 namespace ThmdPlayer.Core.databases
 {
     internal class MigrationMeta

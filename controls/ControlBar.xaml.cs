@@ -1,4 +1,4 @@
-// Version: 1.0.0.657
+// Version: 1.0.0.668
 using Microsoft.Win32;
 using System;
 using System.ComponentModel;
@@ -18,7 +18,7 @@ using System.Xml;
 using System.Windows.Markup;
 using System.Data.Common;
 using ThmdPlayer.Core.helpers;
-using ThmdPlayer.Core.Logs;
+using ThmdPlayer.Core.logs;
 using Newtonsoft.Json.Linq;
 
 namespace ThmdPlayer.Core.controls
@@ -440,7 +440,7 @@ namespace ThmdPlayer.Core.controls
             }
             catch (Exception ex)
             {
-                Logger.Log.Log(Core.Logs.LogLevel.Error, new[] { "Console", "File" }, $"Error: {ex.Message}");
+                Logger.Log.Log(LogLevel.Error, new[] { "Console", "File" }, $"Error: {ex.Message}");
             }
         }
 

@@ -1,4 +1,4 @@
-// Version: 1.0.0.647
+// Version: 1.0.0.658
 using System;
 using System.ComponentModel;
 using System.IO;
@@ -15,6 +15,7 @@ using ThmdPlayer.Core.Interfaces;
 using ThmdPlayer.Core.medias;
 using Vlc.DotNet.Core;
 using Vlc.DotNet.Wpf;
+using ThmdPlayer.Core.logs;
 
 namespace ThmdPlayer.Core.controls
 {
@@ -322,14 +323,14 @@ namespace ThmdPlayer.Core.controls
             _progressBar.VerticalAlignment = VerticalAlignment.Bottom;
             Logger.InitLogs();
 
-            Logger.Log.Log(Logs.LogLevel.Info, "File", $"ProgressBar control was created: {_progressBar}");
-            Logger.Log.Log(Logs.LogLevel.Info, "Console", $"ProgressBar control was created: {_progressBar}");
+            Logger.Log.Log(LogLevel.Info, "File", $"ProgressBar control was created: {_progressBar}");
+            Logger.Log.Log(LogLevel.Info, "Console", $"ProgressBar control was created: {_progressBar}");
 
             _controlBar = new ControlBar(this);
             _controlBar.HorizontalAlignment = HorizontalAlignment.Left;
             _controlBar.VerticalAlignment = VerticalAlignment.Top;
-            Logger.Log.Log(Logs.LogLevel.Info, "File", $"ControlBar control was created: {_controlBar}");
-            Logger.Log.Log(Logs.LogLevel.Info, "Console", $"ControlBar control was created: {_controlBar}");
+            Logger.Log.Log(LogLevel.Info, "File", $"ControlBar control was created: {_controlBar}");
+            Logger.Log.Log(LogLevel.Info, "Console", $"ControlBar control was created: {_controlBar}");
 
             _subtitleControl = new SubControl();
             _subtitleControl.HorizontalAlignment = HorizontalAlignment.Stretch;
@@ -348,8 +349,8 @@ namespace ThmdPlayer.Core.controls
 
             this.Content = _grid;
 
-            Logger.Log.Log(Logs.LogLevel.Info, "File", $"Vlc control was created: {_controlBar}");
-            Logger.Log.Log(Logs.LogLevel.Info, "Console", $"Vlc control was created: {_controlBar}");
+            Logger.Log.Log(LogLevel.Info, "File", $"Vlc control was created: {_controlBar}");
+            Logger.Log.Log(LogLevel.Info, "Console", $"Vlc control was created: {_controlBar}");
 
             _grid.Children.Add(_vlcControl);
             _grid.Children.Add(_subtitleControl);
@@ -358,8 +359,8 @@ namespace ThmdPlayer.Core.controls
             _grid.Children.Add(_playlistView);
             _grid.Children.Add(_spectrumControl);
 
-            Logger.Log.Log(Logs.LogLevel.Info, "File", $"controls was added to: {this}");
-            Logger.Log.Log(Logs.LogLevel.Info, "Console", $"controls was added to: {this}");
+            Logger.Log.Log(LogLevel.Info, "File", $"controls was added to: {this}");
+            Logger.Log.Log(LogLevel.Info, "Console", $"controls was added to: {this}");
 
             Events();
 
@@ -663,12 +664,12 @@ namespace ThmdPlayer.Core.controls
                 _isPaused = false;
                 _isStoped = false;
                 // Log
-                Logger.Log.Log(Logs.LogLevel.Info, "Console", $"Play media: {_media.Uri}; on handle: {_media.Player.Handle};");
-                Logger.Log.Log(Logs.LogLevel.Info, "File", $"Play media: {_media.Uri}; on handle: {_media.Player.Handle};");
+                Logger.Log.Log(LogLevel.Info, "Console", $"Play media: {_media.Uri}; on handle: {_media.Player.Handle};");
+                Logger.Log.Log(LogLevel.Info, "File", $"Play media: {_media.Uri}; on handle: {_media.Player.Handle};");
             }
             catch (Exception ex)
             {
-                Logger.Log.Log(Logs.LogLevel.Error, "Console", $"Play media error: {_media.Uri}; on handle: {_media.Player.Handle} - {ex.Message}");
+                Logger.Log.Log(LogLevel.Error, "Console", $"Play media error: {_media.Uri}; on handle: {_media.Player.Handle} - {ex.Message}");
             }
         }
 
@@ -705,7 +706,7 @@ namespace ThmdPlayer.Core.controls
             {
                 ThreadPool.QueueUserWorkItem(_ => _vlcControl.SourceProvider.MediaPlayer?.Stop());
                 SetThreadExecutionState(ES_CONTINUOUS);
-                Logger.Log.Log(Logs.LogLevel.Debug, new[] { "File", "Console" }, $"{_vlcControl.SourceProvider.MediaPlayer.GetMedia().Title}");
+                Logger.Log.Log(LogLevel.Debug, new[] { "File", "Console" }, $"{_vlcControl.SourceProvider.MediaPlayer.GetMedia().Title}");
                 _playerStatus = MediaPlayerStatus.Stop;
                 _isPlaying = false;
                 _isPaused = false;
@@ -713,8 +714,8 @@ namespace ThmdPlayer.Core.controls
             }
             catch (Exception ex)
             {
-                Logger.Log.Log(Logs.LogLevel.Error, new[] { "File", "Console" }, $"{ex.Message}");
-                Logger.Log.Log(Logs.LogLevel.Error, new[] { "File", "Console" }, $"Stop media error: {_media.Uri}; on handle: {_media.Player.Handle} - {ex.Message}");
+                Logger.Log.Log(LogLevel.Error, new[] { "File", "Console" }, $"{ex.Message}");
+                Logger.Log.Log(LogLevel.Error, new[] { "File", "Console" }, $"Stop media error: {_media.Uri}; on handle: {_media.Player.Handle} - {ex.Message}");
             }
         }
 
@@ -827,7 +828,7 @@ namespace ThmdPlayer.Core.controls
 
                         this._fullscreen = false;
 
-                        Logger.Log.Log(Logs.LogLevel.Info, new string[] { "Console", "File" }, $"Exit fullscreen: Change video screen from fullscreen to last stance {this._lastWindowStance.State}");
+                        Logger.Log.Log(LogLevel.Info, new string[] { "Console", "File" }, $"Exit fullscreen: Change video screen from fullscreen to last stance {this._lastWindowStance.State}");
 
                         return;
                     }
@@ -840,7 +841,7 @@ namespace ThmdPlayer.Core.controls
 
                         this._fullscreen = false;
 
-                        Logger.Log.Log(Logs.LogLevel.Info, new string[] { "Console", "File" }, $"Exit fullscreen: Change video screen from fullscreen to default stance {this._lastWindowStance.State}");
+                        Logger.Log.Log(LogLevel.Info, new string[] { "Console", "File" }, $"Exit fullscreen: Change video screen from fullscreen to default stance {this._lastWindowStance.State}");
                     }
                 }
             }
@@ -855,7 +856,7 @@ namespace ThmdPlayer.Core.controls
 
             this._fullscreen = true;
 
-            Logger.Log.Log(Logs.LogLevel.Info, new string[] { "Console", "File" }, $"Enter fullscreen: Change video screen to fullscreen from last stance {this._lastWindowStance.State}");
+            Logger.Log.Log(LogLevel.Info, new string[] { "Console", "File" }, $"Enter fullscreen: Change video screen to fullscreen from last stance {this._lastWindowStance.State}");
         }
 
         public void Dispose()

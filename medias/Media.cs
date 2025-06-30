@@ -1,4 +1,4 @@
-// Version: 1.0.0.663
+// Version: 1.0.0.674
 using MediaInfo;
 using MediaToolkit;
 using MediaToolkit.Model;
@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using ThmdPlayer.Core.helpers;
 using ThmdPlayer.Core.Interfaces;
+using ThmdPlayer.Core.logs;
 
 namespace ThmdPlayer.Core.medias
 {
@@ -194,22 +195,22 @@ namespace ThmdPlayer.Core.medias
         {
             PositionChanged?.Invoke(this, newPosition);
             // Log
-           Logger.Log.Log(Core.Logs.LogLevel.Info, "Console", $"CurrentTime change event: {newPosition}");
+           Logger.Log.Log(logs.LogLevel.Info, "Console", $"CurrentTime change event: {newPosition}");
         }
 
         protected virtual void OnVolumeChanged(double newVolume)
         {
             VolumeChanged?.Invoke(this, newVolume);
             // Log
-           Logger.Log.Log(Core.Logs.LogLevel.Info, "Console", $"Volume change: {newVolume}");
+           Logger.Log.Log(logs.LogLevel.Info, "Console", $"Volume change: {newVolume}");
         }
 
         protected virtual void OnPlayerChanged(IPlayer player)
         {
             PlayerChanged?.Invoke(this, player);
             // Log
-           Logger.Log.Log(Core.Logs.LogLevel.Info, "Console", $"Player change event: {player}");
-           Logger.Log.Log(Core.Logs.LogLevel.Info, "File", $"Player change event: {player}");
+           Logger.Log.Log(logs.LogLevel.Info, "Console", $"Player change event: {player}");
+           Logger.Log.Log(logs.LogLevel.Info, "File", $"Player change event: {player}");
         }
         #endregion
 
@@ -311,13 +312,13 @@ namespace ThmdPlayer.Core.medias
                     MediaStream = file_stream;
                 }
                 // Log
-               Logger.Log.Log(Core.Logs.LogLevel.Info, "Console", $"[{this.GetType().Name}]: Reading file: {_uri.AbsoluteUri}");
-               Logger.Log.Log(Core.Logs.LogLevel.Info, "File", $"[{this.GetType().Name}]: Reading file: {_uri.AbsoluteUri}");
+               Logger.Log.Log(logs.LogLevel.Info, "Console", $"[{this.GetType().Name}]: Reading file: {_uri.AbsoluteUri}");
+               Logger.Log.Log(logs.LogLevel.Info, "File", $"[{this.GetType().Name}]: Reading file: {_uri.AbsoluteUri}");
             }
             catch (Exception ex)
             {
                 // Log 
-               Logger.Log.Log(Logs.LogLevel.Error, new[] { "Console", "File" }, $"[{this.GetType().Name}]: Can't read m3u8", ex);
+               Logger.Log.Log(logs.LogLevel.Error, new[] { "Console", "File" }, $"[{this.GetType().Name}]: Can't read m3u8", ex);
             }
             finally
             {
@@ -336,7 +337,7 @@ namespace ThmdPlayer.Core.medias
         {
             _player.Dispose();
             // Log
-            Logger.Log.Log(Core.Logs.LogLevel.Info, new string[]{"Console", "File"}, $"[{this.GetType().Name}]: Disposing: {Name}");
+            Logger.Log.Log(logs.LogLevel.Info, new string[]{"Console", "File"}, $"[{this.GetType().Name}]: Disposing: {Name}");
         }
 
         /// <summary>
@@ -351,7 +352,7 @@ namespace ThmdPlayer.Core.medias
             }
             catch (Exception ex)
             {
-               Logger.Log.Log(Logs.LogLevel.Error, new[] { "File", "Console" }, $"Error with player set in media class. In media: {this.Uri}. {ex.Message}");
+               Logger.Log.Log(logs.LogLevel.Error, new[] { "File", "Console" }, $"Error with player set in media class. In media: {this.Uri}. {ex.Message}");
             }
         }
 
@@ -365,8 +366,8 @@ namespace ThmdPlayer.Core.medias
         {
             _player.Play(this);
             // Log
-           Logger.Log.Log(Core.Logs.LogLevel.Info, "Console", $"[{this.GetType().Name}]: Playing media {Name}");
-           Logger.Log.Log(Core.Logs.LogLevel.Info, "File", $"[{this.GetType().Name}]: Playing media {Name}");
+           Logger.Log.Log(logs.LogLevel.Info, "Console", $"[{this.GetType().Name}]: Playing media {Name}");
+           Logger.Log.Log(logs.LogLevel.Info, "File", $"[{this.GetType().Name}]: Playing media {Name}");
         }
 
         /// <summary>
@@ -379,8 +380,8 @@ namespace ThmdPlayer.Core.medias
         {
             _player.Pause();
             // Log
-           Logger.Log.Log(Core.Logs.LogLevel.Info, "Console", $"[{this.GetType().Name}]: Pause media {Name}");
-           Logger.Log.Log(Core.Logs.LogLevel.Info, "File", $"[{this.GetType().Name}]: Pause media {Name}");
+           Logger.Log.Log(logs.LogLevel.Info, "Console", $"[{this.GetType().Name}]: Pause media {Name}");
+           Logger.Log.Log(logs.LogLevel.Info, "File", $"[{this.GetType().Name}]: Pause media {Name}");
         }
 
         /// <summary>
@@ -394,8 +395,8 @@ namespace ThmdPlayer.Core.medias
             _player.Stop();
             Position = 0;
             // Log
-           Logger.Log.Log(Core.Logs.LogLevel.Info, "Console", $"[{this.GetType().Name}]: Stopped media {Name}");
-           Logger.Log.Log(Core.Logs.LogLevel.Info, "File", $"[{this.GetType().Name}]: Stopped media {Name}");
+           Logger.Log.Log(logs.LogLevel.Info, "Console", $"[{this.GetType().Name}]: Stopped media {Name}");
+           Logger.Log.Log(logs.LogLevel.Info, "File", $"[{this.GetType().Name}]: Stopped media {Name}");
         }
 
         /// <summary>
@@ -409,8 +410,8 @@ namespace ThmdPlayer.Core.medias
         {
             Position += seconds;
             // Log
-           Logger.Log.Log(Core.Logs.LogLevel.Info, "Console", $"[{this.GetType().Name}]: Change position to forward with +{seconds} second(s)");
-           Logger.Log.Log(Core.Logs.LogLevel.Info, "File", $"[{this.GetType().Name}]: Change position to forward with +{seconds} second(s)");
+           Logger.Log.Log(logs.LogLevel.Info, "Console", $"[{this.GetType().Name}]: Change position to forward with +{seconds} second(s)");
+           Logger.Log.Log(logs.LogLevel.Info, "File", $"[{this.GetType().Name}]: Change position to forward with +{seconds} second(s)");
         }
 
         /// <summary>
@@ -424,8 +425,8 @@ namespace ThmdPlayer.Core.medias
         {
             Position -= seconds;
             // Log
-            Logger.Log.Log(Core.Logs.LogLevel.Info, "Console", $"[{this.GetType().Name}]: Rewind position by -{seconds} second(s)");
-            Logger.Log.Log(Core.Logs.LogLevel.Info, "File", $"[{this.GetType().Name}]: Rewind position by -{seconds} second(s)");
+            Logger.Log.Log(logs.LogLevel.Info, "Console", $"[{this.GetType().Name}]: Rewind position by -{seconds} second(s)");
+            Logger.Log.Log(logs.LogLevel.Info, "File", $"[{this.GetType().Name}]: Rewind position by -{seconds} second(s)");
         }
 
         private MediaToolkit.Model.Metadata GetMetadata()
@@ -433,7 +434,7 @@ namespace ThmdPlayer.Core.medias
             if(_uri == null || string.IsNullOrEmpty(_uri.LocalPath) || !File.Exists(_uri.LocalPath))
             {
                 // Log error
-                Logger.Log.Log(Logs.LogLevel.Error, new[] { "Console", "File" }, $"[{this.GetType().Name}]: Invalid media file path: {_uri?.LocalPath}");
+                Logger.Log.Log(logs.LogLevel.Error, new[] { "Console", "File" }, $"[{this.GetType().Name}]: Invalid media file path: {_uri?.LocalPath}");
                 return null;
             }
 
@@ -447,14 +448,14 @@ namespace ThmdPlayer.Core.medias
                 }
 
                 // Log
-                Logger.Log.Log(Core.Logs.LogLevel.Info, new[] { "Console", "File" }, $"[{this.GetType().Name}]: Get metadata for media: {_uri.LocalPath}");
+                Logger.Log.Log(logs.LogLevel.Info, new[] { "Console", "File" }, $"[{this.GetType().Name}]: Get metadata for media: {_uri.LocalPath}");
 
                 return inputFile.Metadata;
             }
             catch (Exception ex)
             {
                 // Log error
-                Logger.Log.Log(Logs.LogLevel.Error, new[] { "Console", "File" }, $"[{this.GetType().Name}]: Error getting metadata for media: {_uri.LocalPath}", ex);
+                Logger.Log.Log(logs.LogLevel.Error, new[] { "Console", "File" }, $"[{this.GetType().Name}]: Error getting metadata for media: {_uri.LocalPath}", ex);
                 return null;
             }
         }
@@ -472,7 +473,7 @@ namespace ThmdPlayer.Core.medias
             var duration = _metadataMediaToolkit.Duration.TotalMilliseconds;
             
             // Log
-            Logger.Log.Log(Core.Logs.LogLevel.Info, new[] { "Console", "File" }, $"[{this.GetType().Name}]: Get media {TimeSpan.FromMilliseconds(duration)} duration");
+            Logger.Log.Log(logs.LogLevel.Info, new[] { "Console", "File" }, $"[{this.GetType().Name}]: Get media {TimeSpan.FromMilliseconds(duration)} duration");
 
             return duration;
         }
@@ -483,7 +484,7 @@ namespace ThmdPlayer.Core.medias
             var fps = _metadataMediaToolkit.VideoData.Fps;
             
             // Log
-            Logger.Log.Log(Core.Logs.LogLevel.Info, new[] { "Console", "File" }, $"[{this.GetType().Name}]: Get media {fps} fps");
+            Logger.Log.Log(logs.LogLevel.Info, new[] { "Console", "File" }, $"[{this.GetType().Name}]: Get media {fps} fps");
 
             return fps;
         }

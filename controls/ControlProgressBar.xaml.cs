@@ -1,4 +1,4 @@
-// Version: 1.0.0.661
+// Version: 1.0.0.672
 using System;
 using System.ComponentModel;
 using System.Threading.Tasks;
@@ -8,6 +8,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Effects;
 using ThmdPlayer.Core.Interfaces;
+using ThmdPlayer.Core.logs;
 
 namespace ThmdPlayer.Core.controls
 {
@@ -101,7 +102,7 @@ namespace ThmdPlayer.Core.controls
                 catch (Exception ex)
                 {
                     this._progressBar.Value = 0;
-                    Logger.Log.Log(Logs.LogLevel.Error, new[] { "Console", "File" }, $"{ex.Message}");
+                    Logger.Log.Log(LogLevel.Error, new[] { "Console", "File" }, $"{ex.Message}");
                 }
                 
                 this.OnPropertyChanged(nameof(Value), ref _value, value);

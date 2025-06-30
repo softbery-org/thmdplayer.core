@@ -1,4 +1,4 @@
-// Version: 0.1.0.124
+// Version: 0.1.0.135
 using MediaToolkit;
 using MediaToolkit.Model;
 using MediaToolkit.Options;
@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Controls;
 using System.Windows.Media.Imaging;
+using ThmdPlayer.Core.logs;
 
 namespace ThmdPlayer.Core.medias
 {
@@ -47,7 +48,7 @@ namespace ThmdPlayer.Core.medias
                 }
                 catch (Exception ex)
                 {
-                    Logger.Log.Log(Core.Logs.LogLevel.Error, new string[] { "File", "Console" }, $"Error getting thumbnail: {ex.Message}");
+                    Logger.Log.Log(LogLevel.Error, new string[] { "File", "Console" }, $"Error getting thumbnail: {ex.Message}");
                     return null;
                 }
             }
@@ -62,12 +63,12 @@ namespace ThmdPlayer.Core.medias
         /// <returns></returns>
         public bool CutVideo(string outputPath, TimeSpan startTime, TimeSpan endTime)
         {
-            Logger.Log.Log(Core.Logs.LogLevel.Info, new string[] { "File", "Console" }, $"Cutting video from {_videoUri.LocalPath} to {outputPath} from {startTime} to {endTime}");
+            Logger.Log.Log(LogLevel.Info, new string[] { "File", "Console" }, $"Cutting video from {_videoUri.LocalPath} to {outputPath} from {startTime} to {endTime}");
             // Implementacja cięcia wideo
             var inputFile = new MediaFile { Filename = @$"{_videoUri.LocalPath}" };
             var outputFile = new MediaFile { Filename = @$"{outputPath}" };
 
-            Logger.Log.Log(Core.Logs.LogLevel.Info, new string[] { "File", "Console" }, $"Run MediaToolkit engine for cutting.");
+            Logger.Log.Log(LogLevel.Info, new string[] { "File", "Console" }, $"Run MediaToolkit engine for cutting.");
             using (var engine = new Engine())
             {
                 try
@@ -81,7 +82,7 @@ namespace ThmdPlayer.Core.medias
                 }
                 catch (Exception ex)
                 {
-                    Logger.Log.Log(Core.Logs.LogLevel.Error, new string[] { "File", "Console" }, $"Error cutting video: {ex.Message}");
+                    Logger.Log.Log(LogLevel.Error, new string[] { "File", "Console" }, $"Error cutting video: {ex.Message}");
                     return false;
                 }
             }

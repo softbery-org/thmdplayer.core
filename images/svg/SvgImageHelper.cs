@@ -1,4 +1,4 @@
-// Version: 1.0.0.665
+// Version: 1.0.0.676
 using System;
     using System.IO;
     using System.Windows;
@@ -6,6 +6,7 @@ using System;
     using System.Windows.Markup;
     using System.Windows.Media;
     using System.Xml;
+using ThmdPlayer.Core.logs;
 
 namespace ThmdPlayer.Core.images.svg
 {
@@ -33,7 +34,7 @@ namespace ThmdPlayer.Core.images.svg
             catch (Exception ex)
             {
                 MessageBox.Show($"Error on loading SVG image: {ex.Message}");
-                Logger.Log.Log(Logs.LogLevel.Error, new string[] { "Console", "File" }, $"Error on loading SVG image: {ex.Message}", ex);
+                Logger.Log.Log(LogLevel.Error, new string[] { "Console", "File" }, $"Error on loading SVG image: {ex.Message}", ex);
             }
         }
 

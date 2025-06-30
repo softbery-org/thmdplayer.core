@@ -1,10 +1,10 @@
-// Version: 1.0.0.665
+// Version: 1.0.0.676
 using Newtonsoft.Json;
 using System;
 using System.IO;
 using System.Windows.Media;
 using System.Xml;
-
+using ThmdPlayer.Core.logs;
 using System.Xml.Serialization;
 
 namespace ThmdPlayer.Core.configuration
@@ -60,7 +60,7 @@ namespace ThmdPlayer.Core.configuration
         /// <summary>
         /// Minimum log level for filtering log messages
         /// </summary>
-        public Logs.LogLevel LogLevel { get; set; }
+        public LogLevel LogLevel { get; set; }
 
         /// <summary>
         /// configuration settings for subtitle rendering
@@ -89,7 +89,7 @@ namespace ThmdPlayer.Core.configuration
             ApiKey = "default-key";
             LibVlcPath = "libvlc";
             EnableLibVlc = true;
-            LogLevel = Logs.LogLevel.Info;
+            LogLevel = LogLevel.Info;
             SubtitleConfig = new SubtitleConfig(24, "Arial", System.Windows.Media.Brushes.WhiteSmoke, true, new Shadow());
             UpdateConfig = new UpdateConfig
             {

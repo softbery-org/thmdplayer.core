@@ -1,4 +1,4 @@
-// Version: 1.0.0.663
+// Version: 1.0.0.674
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,6 +10,7 @@ using System.Windows.Threading;
 using System.Windows.Controls;
 using System.Windows.Input;
 using ThmdPlayer.Core.controls;
+using ThmdPlayer.Core.logs;
 
 namespace ThmdPlayer.Core.helpers
 {
@@ -64,8 +65,8 @@ namespace ThmdPlayer.Core.helpers
                 }
                 catch (Exception ex)
                 {
-                    Logger.Log.Log(Core.Logs.LogLevel.Error, "Console", $"{ex.Message}");
-                    Logger.Log.Log(Core.Logs.LogLevel.Error, "File", $"{ex.Message}");
+                    Logger.Log.Log(LogLevel.Error, "Console", $"{ex.Message}");
+                    Logger.Log.Log(LogLevel.Error, "File", $"{ex.Message}");
                 }
             }));
             await Task.FromResult(task).Result;
@@ -88,8 +89,8 @@ namespace ThmdPlayer.Core.helpers
                 }
                 catch (Exception ex)
                 {
-                    Logger.Log.Log(Core.Logs.LogLevel.Error, "Console", $"{ex.Message}");
-                    Logger.Log.Log(Core.Logs.LogLevel.Error, "File", $"{ex.Message}");
+                    Logger.Log.Log(LogLevel.Error, "Console", $"{ex.Message}");
+                    Logger.Log.Log(LogLevel.Error, "File", $"{ex.Message}");
                 }
             }));
             await Task.FromResult(task).Result;

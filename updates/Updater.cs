@@ -1,11 +1,11 @@
-// Version: 1.0.0.665
+// Version: 1.0.0.676
 using System;
 using System.Diagnostics;
 using System.IO;
 using System.Net.Http;
 using System.Reflection;
 using System.Threading.Tasks;
-using ThmdPlayer.Core.Logs;
+using ThmdPlayer.Core.logs;
 
 namespace ThmdPlayer.Core.Updates
 {

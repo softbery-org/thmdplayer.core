@@ -1,4 +1,4 @@
-// Version: 1.0.0.586
+// Version: 1.0.0.597
 using LibVLCSharp.Shared;
 using System;
 using System.Collections.Generic;
