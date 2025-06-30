@@ -1,0 +1,944 @@
+// Version: 1.0.0.5
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net.Sockets;
+using System.Text;
+using System.Text.Json;
+using System.Threading.Tasks;
+
+namespace ThmdPlayer.Core.connection
+{
+    // Przyk�ad u�ycia z obs�ug� du�ych danych
+    public class ChunkedDataHandler
+    {
+        public static byte[] SerializeLargeData<T>(T data)
+        {
+            var options = new JsonSerializerOptions { WriteIndented = true };
+            var json = JsonSerializer.Serialize(data, options);
+            return Encoding.UTF8.GetBytes(json);
+        }
+
+        public static T DeserializeLargeData<T>(byte[] data)
+        {
+            var json = Encoding.UTF8.GetString(data);
+            return JsonSerializer.Deserialize<T>(json);
+        }
+
+        public static void SendLargeData(NetworkStream stream, byte[] data)
+        {
+            // Wys�anie rozmiaru danych
+            var lengthBytes = BitConverter.GetBytes(data.Length);
+            stream.Write(lengthBytes, 0, 4);
+
+            // Wys�anie danych w chunkach
+            int offset = 0;
+            while (offset < data.Length)
+            {
+                int chunkSize = Math.Min(4096, data.Length - offset);
+                stream.Write(data, offset, chunkSize);
+                offset += chunkSize;
+            }
+        }
+
+        public static byte[] ReceiveLargeData(NetworkStream stream)
+        {
+            // Odczyt rozmiaru danych
+            var lengthBytes = new byte[4];
+            stream.Read(lengthBytes, 0, 4);
+            int length = BitConverter.ToInt32(lengthBytes, 0);
+
+            // Odczyt danych
+            var buffer = new byte[length];
+            int offset = 0;
+            while (offset < length)
+            {
+                int chunkSize = stream.Read(buffer, offset, length - offset);
+                offset += chunkSize;
+            }
+            return buffer;
+        }
+    }
+}
+// Version: 1.0.0.4
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace ThmdPlayer.Core.connection
+{
+    public static class KayGen
+    {
+        public static string GenerateKey(int length)
+        {
+            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+            var random = new Random();
+            var key = new char[length];
+            for (int i = 0; i < length; i++)
+            {
+                key[i] = chars[random.Next(chars.Length)];
+            }
+
+            // Generowanie kluczy (powinny by� przechowywane bezpiecznie)
+            var aesKey = new byte[32];
+            var hmacKey = new byte[64];
+            RandomNumberGenerator.Create(aesKey.ToString());
+            RandomNumberGenerator.Create(hmacKey.ToString());
+
+            return new string(key);
+        }
+    }
+}
+// Version: 1.0.0.10
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace ThmdPlayer.Core.connection
+{
+    public class NetworkRequest
+    {
+        public string Action { get; set; }
+        public Dictionary<string, object> Data { get; set; } = new Dictionary<string, object>();
+    }
+}
+// Version: 1.0.0.10
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace ThmdPlayer.Core.connection
+{
+    public class NetworkResponse
+    {
+        public bool Success { get; set; }
+        public string Message { get; set; }
+        public object Result { get; set; }
+
+        public NetworkResponse(bool success, string message, object result = null)
+        {
+            Success = success;
+            Message = message;
+            Result = result;
+        }
+    }
+}
+// Version: 1.0.0.7
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net.Sockets;
+using System.Text;
+using System.Text.Json;
+using System.Threading.Tasks;
+using ThmdPlayer.Core.medias;
+
+namespace ThmdPlayer.Core.connection
+{
+    public class NetworkStreamingClient
+    {
+        private readonly string _serverAddress;
+        private readonly int _port;
+
+        public NetworkStreamingClient(string serverAddress, int port)
+        {
+            _serverAddress = serverAddress;
+            _port = port;
+        }
+
+        public NetworkResponse SendRequest(NetworkRequest request)
+        {
+            using (var client = new TcpClient(_serverAddress, _port))
+            using (var stream = client.GetStream())
+            {
+                var requestData = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(request));
+                stream.Write(requestData, 0, requestData.Length);
+
+                var buffer = new byte[1024];
+                var bytesRead = stream.Read(buffer, 0, buffer.Length);
+                return JsonSerializer.Deserialize<NetworkResponse>(Encoding.UTF8.GetString(buffer, 0, bytesRead));
+            }
+        }
+    }
+}
+// Version: 1.0.0.10
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net.Sockets;
+using System.Net;
+using System.Text;
+using System.Threading.Tasks;
+using ThmdPlayer.Core.connection;
+using ThmdPlayer.Core.medias;
+using ThmdPlayer.Core.server;
+using System.Text.Json;
+
+namespace ThmdPlayer.Core.connection
+{
+    public class NetworkStreamingServer
+    {
+        private readonly StreamingServer _server;
+        private readonly TcpListener _listener;
+        private bool _isRunning;
+
+        public NetworkStreamingServer(StreamingServer server, int port)
+        {
+            _server = server;
+            _listener = new TcpListener(IPAddress.Any, port);
+        }
+
+        public void Start()
+        {
+            _isRunning = true;
+            _listener.Start();
+            Console.WriteLine("Serwer uruchomiony...");
+
+            while (_isRunning)
+            {
+                var client = _listener.AcceptTcpClient();
+                HandleClient(client);
+            }
+        }
+
+        private void HandleClient(TcpClient client)
+        {
+            using (var stream = client.GetStream())
+            {
+                var buffer = new byte[1024];
+                var bytesRead = stream.Read(buffer, 0, buffer.Length);
+                var request = JsonSerializer.Deserialize<NetworkRequest>(Encoding.UTF8.GetString(buffer, 0, bytesRead));
+
+                var response = ProcessRequest(request);
+
+                var responseData = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(response));
+                stream.Write(responseData, 0, responseData.Length);
+            }
+        }
+
+        private NetworkResponse ProcessRequest(NetworkRequest request)
+        {
+            try
+            {
+                switch (request.Action)
+                {
+                    case "Register":
+                        _server.RegisterUser((string)request.Data["Name"], (string)request.Data["Email"]);
+                        return new NetworkResponse(true, "Rejestracja udana");
+
+                    case "RentMovie":
+                        var result = _server.RentMovie((int)request.Data["UserId"], (int)request.Data["MovieId"]);
+                        return new NetworkResponse(result, result ? "Wypożyczono film" : "Błąd wypożyczenia");
+
+                    // Dodaj pozostałe akcje...
+
+                    default:
+                        return new NetworkResponse(false, "Nieznana akcja");
+                }
+            }
+            catch (Exception ex)
+            {
+                return new NetworkResponse(false, $"Błąd: {ex.Message}");
+            }
+        }
+
+        public void Stop()
+        {
+            _isRunning = false;
+            _listener.Stop();
+        }
+    }
+}
+// Version: 1.0.0.0
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security;
+using System.Text;
+using System.Threading.Tasks;
+using ThmdPlayer.Core.connection.services;
+
+namespace ThmdPlayer.Core.connection
+{
+    public class SecureCommunicationHandler
+    {
+        private readonly CryptoService _crypto;
+
+        public SecureCommunicationHandler(CryptoService crypto)
+        {
+            _crypto = crypto;
+        }
+
+        public string PrepareSecureMessage(string message)
+        {
+            var (ciphertext, iv, hmac) = _crypto.Encrypt(message);
+            return $"{Convert.ToBase64String(ciphertext)}|{Convert.ToBase64String(iv)}|{Convert.ToBase64String(hmac)}";
+        }
+
+        public string ProcessSecureMessage(string secureMessage)
+        {
+            var parts = secureMessage.Split('|');
+            if (parts.Length != 3) throw new SecurityException("Invalid message format");
+
+            var ciphertext = Convert.FromBase64String(parts[0]);
+            var iv = Convert.FromBase64String(parts[1]);
+            var hmac = Convert.FromBase64String(parts[2]);
+
+            return _crypto.Decrypt(ciphertext, iv, hmac);
+        }
+    }
+}
+// Version: 1.0.0.8
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace ThmdPlayer.Core.connection
+{
+    public class SecureStreamingClient : NetworkStreamingClient
+    {
+        private readonly byte[] _aesKey;
+        private readonly byte[] _hmacKey;
+        private string _currentSessionToken;
+
+        public SecureStreamingClient(string serverAddress, int port, byte[] aesKey, byte[] hmacKey)
+            : base(serverAddress, port)
+        {
+            _aesKey = aesKey;
+            _hmacKey = hmacKey;
+        }
+
+        public new NetworkResponse SendRequest(NetworkRequest request)
+        {
+            // Dodaj token sesji je�li istnieje
+            if (!string.IsNullOrEmpty(_currentSessionToken))
+            {
+                request.Data["SessionToken"] = _currentSessionToken;
+            }
+
+            // Szyfrowanie i podpis ��dania
+            var encryptedRequest = EncryptAndSignRequest(request);
+
+            var response = base.SendRequest(encryptedRequest);
+
+            // Deszyfrowanie odpowiedzi
+            return DecryptAndVerifyResponse(response);
+        }
+
+        private NetworkRequest EncryptAndSignRequest(NetworkRequest request)
+        {
+            // Implementacja szyfrowania AES i HMAC
+            // ...
+        }
+
+        private NetworkResponse DecryptAndVerifyResponse(NetworkResponse response)
+        {
+            // Implementacja deszyfracji i weryfikacji
+            // ...
+        }
+
+        public bool Login(string email, string password)
+        {
+            var request = new NetworkRequest
+            {
+                Action = "Login",
+                Data = new Dictionary<string, object>
+            {
+                { "Email", email },
+                { "Password", password }
+            }
+            };
+
+            var response = SendRequest(request);
+            if (response.Success)
+            {
+                _currentSessionToken = response.Result.ToString();
+                return true;
+            }
+            return false;
+        }
+    }
+}
+// Version: 1.0.0.7
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace ThmdPlayer.Core.connection
+{
+    public class SecureStreamingServer : NetworkStreamingServer
+    {
+        private readonly Dictionary<string, Session> _activeSessions = new();
+        private readonly byte[] _aesKey;
+        private readonly byte[] _hmacKey;
+
+        public SecureStreamingServer(StreamingServer server, int port, byte[] aesKey, byte[] hmacKey)
+            : base(server, port)
+        {
+            _aesKey = aesKey;
+            _hmacKey = hmacKey;
+        }
+
+        protected override NetworkResponse ProcessRequest(NetworkRequest request)
+        {
+            try
+            {
+                // Deszyfrowanie i weryfikacja
+                var decryptedRequest = DecryptAndVerifyRequest(request);
+
+                // Weryfikacja sesji dla operacji wymagaj�cych autentykacji
+                if (RequiresAuthentication(decryptedRequest.Action)
+                {
+                    if (!ValidateSession(decryptedRequest))
+                        return new NetworkResponse(false, "Nieprawid�owa sesja");
+                }
+
+                var response = base.ProcessRequest(decryptedRequest);
+
+                // Szyfrowanie odpowiedzi
+                return EncryptAndSignResponse(response);
+            }
+            catch (SecurityException ex)
+            {
+                return new NetworkResponse(false, $"B��d bezpiecze�stwa: {ex.Message}");
+            }
+        }
+
+        private NetworkRequest DecryptAndVerifyRequest(NetworkRequest encryptedRequest)
+        {
+            // Implementacja deszyfracji i weryfikacji HMAC
+            // ...
+        }
+
+        private NetworkResponse EncryptAndSignResponse(NetworkResponse response)
+        {
+            // Implementacja szyfrowania i podpisu HMAC
+            // ...
+        }
+
+        private bool ValidateSession(NetworkRequest request)
+        {
+            if (!request.Data.TryGetValue("SessionToken", out var token))
+                return false;
+
+            var sessionToken = token.ToString();
+            if (!_activeSessions.TryGetValue(sessionToken, out var session))
+                return false;
+
+            if (session.Expiration < DateTime.Now)
+            {
+                _activeSessions.Remove(sessionToken);
+                return false;
+            }
+
+            // Przed�u� sesj�
+            session.Expiration = DateTime.Now.AddMinutes(30);
+            return true;
+        }
+
+        private bool RequiresAuthentication(string action)
+        {
+            return action switch
+            {
+                "Login" or "Register" => false,
+                _ => true
+            };
+        }
+
+        public string CreateNewSession(int userId)
+        {
+            var token = GenerateSessionToken();
+            _activeSessions[token] = new Session
+            {
+                Token = token,
+                UserId = userId,
+                Expiration = DateTime.Now.AddMinutes(30)
+            };
+            return token;
+        }
+
+        private static string GenerateSessionToken()
+        {
+            return Guid.NewGuid().ToString() + Guid.NewGuid().ToString();
+        }
+    }
+}
+// Version: 1.0.0.0
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace ThmdPlayer.Core.connection
+{
+    public class SecurityManager
+    {
+        // Konfiguracja parametr�w kryptograficznych
+        public const int AES_KEY_SIZE = 256;
+        public const int HMAC_KEY_SIZE = 256;
+        public const int SALT_SIZE = 32;
+        public const int IV_SIZE = 16;
+        public const int HMAC_SIZE = 32;
+        public const int SESSION_TOKEN_SIZE = 64;
+        public const int SESSION_TIMEOUT_MINUTES = 30;
+
+        // Generowanie kluczy (powinny by� bezpiecznie przechowywane)
+        public static (byte[] aesKey, byte[] hmacKey) GenerateKeys()
+        {
+            using var aes = Aes.Create();
+            aes.KeySize = AES_KEY_SIZE;
+            aes.GenerateKey();
+
+            using var hmac = new HMACSHA256();
+            hmac.KeySize = HMAC_KEY_SIZE;
+            hmac.GenerateKey();
+
+            return (aes.Key, hmac.Key);
+        }
+
+        public static string GenerateSessionToken()
+        {
+            var tokenBytes = new byte[SESSION_TOKEN_SIZE];
+            using var rng = RandomNumberGenerator.Create();
+            rng.GetBytes(tokenBytes);
+            return Convert.ToBase64String(tokenBytes);
+        }
+    }
+}
+// Version: 1.0.0.11
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace ThmdPlayer.Core.connection
+{
+    public class Session
+    {
+        public string Token { get; set; }
+        public int UserId { get; set; }
+        public DateTime Expiration { get; set; }
+    }
+}
+// Version: 1.0.0.12
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using ThmdPlayer.Core.medias;
+
+namespace ThmdPlayer.Core.connection
+{
+    public class StreamingClient
+    {
+        private StreamingServer server;
+        public User CurrentUser { get; private set; }
+
+        public StreamingClient(StreamingServer server)
+        {
+            this.server = server;
+        }
+
+        public void Register(string name, string email)
+        {
+            server.RegisterUser(name, email);
+        }
+
+        public bool Login(string email)
+        {
+            CurrentUser = server.GetUserByEmail(email);
+            return CurrentUser != null;
+        }
+
+        public void Logout()
+        {
+            CurrentUser = null;
+        }
+
+        public List<Movie> SearchMoviesByTitle(string title)
+        {
+            return server.SearchMoviesByTitle(title);
+        }
+
+        public List<Movie> SearchMoviesByGenre(string genre)
+        {
+            return server.SearchMoviesByGenre(genre);
+        }
+
+        public bool RentMovie(int movieId)
+        {
+            if (CurrentUser == null) return false;
+            return server.RentMovie(CurrentUser.Id, movieId);
+        }
+
+        public bool ReturnMovie(int movieId)
+        {
+            if (CurrentUser == null) return false;
+            return server.ReturnMovie(CurrentUser.Id, movieId);
+        }
+
+        public void DisplayUserInfo()
+        {
+            if (CurrentUser == null)
+            {
+                Console.WriteLine("Nie jeste� zalogowany!");
+                return;
+            }
+
+            Console.WriteLine($"U�ytkownik: {CurrentUser.Name}");
+            Console.WriteLine($"Email: {CurrentUser.Email}");
+            Console.WriteLine($"Saldo: {CurrentUser.Balance:C}");
+            Console.WriteLine("Wypo�yczone filmy:");
+            foreach (var movie in CurrentUser.RentedMovies)
+            {
+                Console.WriteLine($"- {movie.Title} ({movie.Year})");
+            }
+        }
+
+        public void TopUpBalance(decimal amount)
+        {
+            if (CurrentUser == null) return;
+            server.TopUpBalance(CurrentUser.Id, amount);
+        }
+    }
+}
+// Version: 1.0.0.18
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+using ThmdPlayer.Core.medias;
+using ThmdPlayer.Core.connection;
+
+namespace ThmdPlayer.Core.connection
+{
+    public class StreamingServer
+    {
+        private List<Movie> _movies;
+        private List<User> _users;
+        private int _movieIdCounter;
+        private int __userIdCounter;
+
+        public StreamingServer()
+        {
+            _movies = new List<Movie>();
+            _users = new List<User>();
+            _movieIdCounter = 1;
+            __userIdCounter = 1;
+        }
+
+        public void AddMovie(string title, string genre, int year, decimal cost)
+        {
+            _movies.Add(new Movie(_movieIdCounter++, title, genre, year, cost));
+        }
+
+        public void RegisterUser(string name, string email)
+        {
+            _users.Add(new User(__userIdCounter++, name, email));
+        }
+
+        public User GetUserByEmail(string email)
+        {
+            return _users.FirstOrDefault(u => u.Email == email);
+        }
+
+        public List<Movie> SearchMoviesByTitle(string title)
+        {
+            return _movies.Where(m => m.Title.Contains(title)).ToList();
+        }
+
+        public List<Movie> SearchMoviesByGenre(string genre)
+        {
+            return _movies.Where(m => m.Genre.Equals(genre, StringComparison.OrdinalIgnoreCase)).ToList();
+        }
+
+        public bool RentMovie(int userId, int MovieId)
+        {
+            var user = _users.FirstOrDefault(u => u.Id == userId);
+            var Movie = _movies.FirstOrDefault(m => m.Id == MovieId);
+
+            if (user == null || Movie == null || !Movie.IsAvailable || user.Balance < Movie.RentalCost)                return false;
+
+            user.Balance -= Movie.RentalCost;
+            Movie.IsAvailable = false;
+            user.RentedMovies.Add(Movie);
+            return true;
+        }
+
+        public bool ReturnMovie(int userId, int MovieId)
+        {
+            var user = _users.FirstOrDefault(u => u.Id == userId);
+            var Movie = _movies.FirstOrDefault(m => m.Id == MovieId);
+
+            if (user == null || Movie == null || !user.RentedMovies.Contains(Movie))
+                return false;
+
+            Movie.IsAvailable = true;
+            user.RentedMovies.Remove(Movie);
+            return true;
+        }
+
+        public void TopUpBalance(int userId, decimal amount)
+        {
+            var user = _users.FirstOrDefault(u => u.Id == userId);
+            if (user != null) user.Balance += amount;
+        }
+    }
+}
+// Version: 1.0.0.16
+using FFmpeg.AutoGen;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
+using System.Threading.Tasks;
+using ThmdPlayer.Core.medias;
+
+namespace ThmdPlayer.Core.connection
+{
+    public class User
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public string Email { get; set; }
+        public byte[] PasswordHash { get; set; }
+        public byte[] Salt { get; set; }
+        public string Username { get; set; }
+        public decimal Balance { get; set; }
+        public List<Movie> RentedMovies { get; set; }
+
+        public User(int id, string name, string email)
+        {
+            Id = id;
+            Name = name;
+            Email = email;
+            Balance = 0;
+            RentedMovies = new List<Movie>();
+        }
+
+        public void SetPassword(string password)
+        {
+            Salt = GenerateSalt();
+            PasswordHash = HashPassword(password, Salt);
+        }
+
+        private static byte[] GenerateSalt(int size = 32)
+        {
+            var rng = new RNGCryptoServiceProvider();
+            var buff = new byte[size];
+            rng.GetBytes(buff);
+            var s =  Convert.ToBase64String(buff);
+            return buff;
+        }
+
+        private static byte[] HashPassword(string password, byte[] salt)
+        {
+            using var sha256 = SHA256.Create();
+            var saltedPassword = password + salt;
+            var bytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(saltedPassword));
+            var s = Convert.ToBase64String(bytes);
+            return bytes;
+        }
+    }
+}
+// Version: 1.0.0.1
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
+using System.Threading.Tasks;
+using ThmdPlayer.Core.connection;
+
+namespace ThmdPlayer.Core.connection.services
+{
+    public class AuthService
+    {
+        private readonly Dictionary<string, Session> _activeSessions = new();
+        private readonly CryptoService _crypto;
+
+        public AuthService(CryptoService crypto)
+        {
+            _crypto = crypto;
+        }
+
+        public User RegisterUser(string username, string password)
+        {
+            var salt = GenerateSalt();
+            var passwordHash = HashPassword(password, salt);
+
+            return new User
+            {
+                Username = username,
+                PasswordHash = passwordHash,
+                Salt = salt
+            };
+        }
+
+        public bool ValidateLogin(User user, string password)
+        {
+            var computedHash = HashPassword(password, user.Salt);
+            return CompareHashes(computedHash, user.PasswordHash);
+        }
+
+        public string CreateSession(int userId)
+        {
+            var sessionToken = SecurityManager.GenerateSessionToken();
+            var encryptedToken = EncryptSessionToken(sessionToken);
+
+            _activeSessions[encryptedToken] = new Session
+            {
+                UserId = userId,
+                Expiration = DateTime.UtcNow.AddMinutes(SESSION_TIMEOUT_MINUTES)
+            };
+
+            return encryptedToken;
+        }
+
+        public bool ValidateSession(string sessionToken)
+        {
+            if (!_activeSessions.TryGetValue(sessionToken, out var session))
+                return false;
+
+            if (session.Expiration < DateTime.UtcNow)
+            {
+                _activeSessions.Remove(sessionToken);
+                return false;
+            }
+
+            // Automatyczne przed�u�anie sesji
+            session.Expiration = DateTime.UtcNow.AddMinutes(SESSION_TIMEOUT_MINUTES);
+            return true;
+        }
+
+        private string EncryptSessionToken(string token)
+        {
+            var encrypted = _crypto.Encrypt(token);
+            return Convert.ToBase64String(encrypted.ciphertext)
+                   + "|" + Convert.ToBase64String(encrypted.iv)
+                   + "|" + Convert.ToBase64String(encrypted.hmac);
+        }
+
+        private byte[] GenerateSalt()
+        {
+            var salt = new byte[SecurityManager.SALT_SIZE];
+            using var rng = RandomNumberGenerator.Create();
+            rng.GetBytes(salt);
+            return salt;
+        }
+
+        private byte[] HashPassword(string password, byte[] salt)
+        {
+            using var sha256 = SHA256.Create();
+            var saltedPassword = Encoding.UTF8.GetBytes(password + Convert.ToBase64String(salt));
+            return sha256.ComputeHash(saltedPassword);
+        }
+
+        private bool CompareHashes(byte[] a, byte[] b)
+        {
+            if (a.Length != b.Length) return false;
+            for (int i = 0; i < a.Length; i++)
+                if (a[i] != b[i]) return false;
+            return true;
+        }
+    }
+
+}
+// Version: 1.0.0.2
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Security.Cryptography;
+using System.Security;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace ThmdPlayer.Core.connection.services
+{
+    public class CryptoService
+    {
+        private readonly byte[] _aesKey;
+        private readonly byte[] _hmacKey;
+
+        public CryptoService(byte[] aesKey, byte[] hmacKey)
+        {
+            _aesKey = aesKey ?? throw new ArgumentNullException(nameof(aesKey));
+            _hmacKey = hmacKey ?? throw new ArgumentNullException(nameof(hmacKey));
+        }
+
+        public (byte[] ciphertext, byte[] iv, byte[] hmac) Encrypt(string plaintext)
+        {
+            using var aes = Aes.Create();
+            aes.Key = _aesKey;
+            aes.GenerateIV();
+            var iv = aes.IV;
+
+            using var encryptor = aes.CreateEncryptor();
+            using var ms = new MemoryStream();
+            using (var cs = new CryptoStream(ms, encryptor, CryptoStreamMode.Write))
+            using (var sw = new StreamWriter(cs))
+            {
+                sw.Write(plaintext);
+            }
+
+            var ciphertext = ms.ToArray();
+            var hmac = ComputeHMAC(ciphertext, iv);
+
+            return (ciphertext, iv, hmac);
+        }
+
+        public string Decrypt(byte[] ciphertext, byte[] iv, byte[] receivedHmac)
+        {
+            var computedHmac = ComputeHMAC(ciphertext, iv);
+            if (!CompareHmac(computedHmac, receivedHmac))
+                throw new SecurityException("HMAC validation failed");
+
+            using var aes = Aes.Create();
+            aes.Key = _aesKey;
+            aes.IV = iv;
+
+            using var decryptor = aes.CreateDecryptor();
+            using var ms = new MemoryStream(ciphertext);
+            using var cs = new CryptoStream(ms, decryptor, CryptoStreamMode.Read);
+            using var sr = new StreamReader(cs);
+            return sr.ReadToEnd();
+        }
+
+        private byte[] ComputeHMAC(byte[] ciphertext, byte[] iv)
+        {
+            using var hmac = new HMACSHA256(_hmacKey);
+            var combinedData = new byte[ciphertext.Length + iv.Length];
+            Buffer.BlockCopy(ciphertext, 0, combinedData, 0, ciphertext.Length);
+            Buffer.BlockCopy(iv, 0, combinedData, ciphertext.Length, iv.Length);
+            return hmac.ComputeHash(combinedData);
+        }
+
+        private bool CompareHmac(byte[] a, byte[] b)
+        {
+            if (a.Length != b.Length) return false;
+            for (int i = 0; i < a.Length; i++)
+                if (a[i] != b[i]) return false;
+            return true;
+        }
+    }
+}

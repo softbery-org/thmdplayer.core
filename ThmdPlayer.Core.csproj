@@ -1,0 +1,263 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{540345C0-E860-4722-B326-944AD161ABB5}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>ThmdPlayer.Core</RootNamespace>
+    <AssemblyName>ThmdPlayer.Core</AssemblyName>
+    <TargetFrameworkVersion>v4.8.1</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+    <LangVersion>12.0</LangVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xaml" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+    <Reference Include="WindowsBase" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="ai\OpenAI.cs" />
+    <Compile Include="connection\ChunkDataHandler.cs" />
+    <Compile Include="connection\KayGen.cs" />
+    <Compile Include="connection\NetworkStreamingClient.cs" />
+    <Compile Include="connection\SecureCommunicationHandler.cs" />
+    <Compile Include="connection\SecureStreamingClient.cs" />
+    <Compile Include="connection\SecurityManager.cs" />
+    <Compile Include="connection\services\AuthService.cs" />
+    <Compile Include="connection\services\CryptoService.cs" />
+    <Compile Include="connection\StreamingClient.cs" />
+    <Compile Include="configuration\Config.cs" />
+    <Compile Include="connection\NetworkRequest.cs" />
+    <Compile Include="connection\NetworkResponse.cs" />
+    <Compile Include="connection\NetworkStreamingServer.cs" />
+    <Compile Include="connection\SecureStreamingServer.cs" />
+    <Compile Include="connection\Session.cs" />
+    <Compile Include="controls\ColorPicker.xaml.cs">
+      <DependentUpon>ColorPicker.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="controls\ControlBar.xaml.cs">
+      <DependentUpon>ControlBar.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="controls\ControlProgressBar.xaml.cs">
+      <DependentUpon>ControlProgressBar.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="controls\Player.xaml.cs">
+      <DependentUpon>Player.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="controls\PlayerWindow.xaml.cs">
+      <DependentUpon>PlayerWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="controls\PlaylistView.xaml.cs">
+      <DependentUpon>PlaylistView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="controls\ShortcutsTab.xaml.cs">
+      <DependentUpon>ShortcutsTab.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="controls\AudioSpectrumControl.xaml.cs">
+      <DependentUpon>AudioSpectrumControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="controls\SubControl.xaml.cs">
+      <DependentUpon>SubControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="controls\SubtitleControl.xaml.cs">
+      <DependentUpon>SubtitleControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="connection\User.cs" />
+    <Compile Include="databases\DatabaseUpdater.cs" />
+    <Content Include="databases\scripts\DatabaseUpdaterScript.sql" />
+    <Compile Include="databases\exceptions\DatabaseOperationException.cs" />
+    <Compile Include="databases\exceptions\VersionMismatchException.cs" />
+    <Compile Include="databases\MigrationMeta.cs" />
+    <Compile Include="Logger.cs" />
+    <Compile Include="helpers\HelpGenerator.cs" />
+    <Compile Include="helpers\HelpOption.cs" />
+    <Compile Include="helpers\PathCheckHelper.cs" />
+    <Compile Include="helpers\ResizeControlHelper.cs" />
+    <Compile Include="helpers\ShowHideControlsHelper.cs" />
+    <Compile Include="helpers\SizeingMouseEventsHelper.cs" />
+    <Compile Include="helpers\StoryboardHelper.cs" />
+    <Compile Include="helpers\VideoTypeChecker.cs" />
+    <Compile Include="images\Svg\SvgImageConverter.cs" />
+    <Compile Include="images\Svg\SvgImageHelper.cs" />
+    <Compile Include="images\Svg\SvgThemeHelper.cs" />
+    <Compile Include="images\Svg\SvgToXamlConverter.cs" />
+    <Compile Include="interfaces\IMedia.cs" />
+    <Compile Include="interfaces\IMediaStream.cs" />
+    <Compile Include="interfaces\IPlayer.cs" />
+    <Compile Include="logs\ConsoleSink.cs" />
+    <Compile Include="logs\FileSink.cs" />
+    <Compile Include="logs\Logger.cs" />
+    <Compile Include="logs\Metrics.cs" />
+    <Compile Include="medias\FileMediaStream.cs" />
+    <Compile Include="medias\HlsSegment.cs" />
+    <Compile Include="medias\HlsStreamer.cs" />
+    <Compile Include="medias\Media.cs" />
+    <Compile Include="medias\MediaEditor.cs" />
+    <Compile Include="medias\MediaInfoEventArgs.cs" />
+    <Compile Include="medias\MediaPlayerStatus.cs" />
+    <Compile Include="medias\MediaType.cs" />
+    <Compile Include="medias\Movie.cs" />
+    <Compile Include="medias\NetworkMediaStream.cs" />
+    <Compile Include="medias\Playlist.cs" />
+    <Compile Include="medias\ScreenRecorder.cs" />
+    <Compile Include="medias\SeekDirection.cs" />
+    <Compile Include="medias\Song.cs" />
+    <Compile Include="medias\WindowLastStance.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="connection\StreamingServer.cs" />
+    <Compile Include="shortcuts\ShortcutsTabItem.cs" />
+    <Compile Include="subtitles\Subtitle.cs" />
+    <Compile Include="subtitles\SubtitleFontArgs.cs" />
+    <Compile Include="subtitles\SubtitleManager.cs" />
+    <Compile Include="updates\Updater.cs" />
+    <Compile Include="vlc\IVideoPlayer.cs" />
+    <Compile Include="vlc\ViewModel\PlayerViewModel.cs" />
+    <Compile Include="vlc\VlcVideoPlayer.cs" />
+    <Content Include="medias\MediaToolkit.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="controls\ColorPicker.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="controls\ControlBar.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="controls\ControlProgressBar.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="controls\Player.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="controls\PlayerWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="controls\PlaylistView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="controls\ShortcutsTab.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="controls\AudioSpectrumControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="controls\SubControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="controls\SubtitleControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="icons\svg\icons.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="controls\PlaylistView.txt" />
+    <Content Include="icons\ico\themedit.ico" />
+    <Content Include="icons\svg\accessible.svg" />
+    <Content Include="icons\svg\ad.svg" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="FFmpeg.AutoGen">
+      <Version>7.1.1</Version>
+    </PackageReference>
+    <PackageReference Include="LibVLCSharp">
+      <Version>3.9.3</Version>
+    </PackageReference>
+    <PackageReference Include="LibVLCSharp.WPF">
+      <Version>3.9.3</Version>
+    </PackageReference>
+    <PackageReference Include="MediaInfo.Wrapper">
+      <Version>21.9.3</Version>
+    </PackageReference>
+    <PackageReference Include="MediaToolkit">
+      <Version>1.1.0.1</Version>
+    </PackageReference>
+    <PackageReference Include="MySql.Data">
+      <Version>9.3.0</Version>
+    </PackageReference>
+    <PackageReference Include="NAudio">
+      <Version>2.2.1</Version>
+    </PackageReference>
+    <PackageReference Include="Newtonsoft.Json">
+      <Version>13.0.3</Version>
+    </PackageReference>
+    <PackageReference Include="SharpVectors">
+      <Version>1.8.4.2</Version>
+    </PackageReference>
+    <PackageReference Include="SharpVectors.Wpf">
+      <Version>1.8.4.2</Version>
+    </PackageReference>
+    <PackageReference Include="System.Net.Http">
+      <Version>4.3.4</Version>
+    </PackageReference>
+    <PackageReference Include="System.Text.Json">
+      <Version>9.0.6</Version>
+    </PackageReference>
+    <PackageReference Include="VideoLAN.LibVLC.Windows">
+      <Version>3.0.21</Version>
+    </PackageReference>
+    <PackageReference Include="Vlc.DotNet.Wpf">
+      <Version>3.1.0</Version>
+    </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="databases\Repair.md" />
+    <None Include="databases\Updater.md" />
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Target Name="PostBuild" AfterTargets="Compile">
+    <Message Importance="high" Text="PostBuild: $(TargetPath)" />
+    <Message Importance="high" Text="PostBuild: $(TargetDir)" />
+    <Message Importance="high" Text="PostBuild: $(TargetName)" />
+    <Message Importance="high" Text="PostBuild: $(TargetFrameworkVersion)" />
+    <Message Importance="high" Text="PostBuild: $(TargetFramework)" />
+    <Exec Command="..\.softbery\bin\Debug\net9.0\softbery.exe" />
+  </Target>
+</Project>

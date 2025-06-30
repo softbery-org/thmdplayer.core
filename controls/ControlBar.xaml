@@ -1,0 +1,80 @@
+﻿<UserControl x:Class="ThmdPlayer.Core.controls.ControlBar"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:ThmdPlayer.Core.controls"
+             mc:Ignorable="d" d:DesignWidth="800" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Width="auto" Height="160" >
+    <!--MouseDown="UserControl_MouseDown" MouseUp="UserControl_MouseUp" MouseMove="UserControl_MouseMove">-->
+
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../icons/svg/icons.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+            <Storyboard x:Key= "fadeOutControlBar" FillBehavior= "HoldEnd" >
+                <DoubleAnimation
+Storyboard.TargetName= "_grid"
+Storyboard.TargetProperty= "(Opacity)"
+To= "0.0"
+Duration= "0:0:2" />
+            </Storyboard >
+            <Storyboard x:Key= "fadeInControlBar" FillBehavior= "HoldEnd" >
+                <DoubleAnimation
+Storyboard.TargetName= "_grid"
+Storyboard.TargetProperty= "(Opacity)"
+To= "1.0"
+Duration= "0:0:4" />
+            </Storyboard >
+        </ResourceDictionary>
+    </UserControl.Resources>
+    <Grid x:Name="_grid" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="Gray">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="29*"/>
+            <RowDefinition Height="45*"/>
+            <RowDefinition Height="39*"/>
+            <RowDefinition Height="21*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="35*"/>
+            <ColumnDefinition Width="22*"/>
+            <ColumnDefinition Width="23*"/>
+        </Grid.ColumnDefinitions>
+        <Label x:Name="_mediaElementLabel" Content="Media Element Label" HorizontalAlignment="Left" VerticalAlignment="Top" Width="550" Height="27" Foreground="White" FontSize="14" Grid.ColumnSpan="2" Margin="10, 0, 0, 0"/>
+        <!--<Grid Grid.Column="2" Grid.Row="2">
+            <Label x:Name="_timerLabelPosition" Content="0 0 : 0 0 : 0 0" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" FontFamily="Bahnschrift SemiBold SemiCondensed" FontSize="16" Foreground="White" Canvas.Left="0" Canvas.Top="0"/>
+            <Label x:Name="_timerLabelDuration" Content="/ 0 0 : 0 0 : 0 0" VerticalAlignment="Center" HorizontalAlignment="Center" Visibility="Hidden" VerticalContentAlignment="Stretch" HorizontalContentAlignment="Center" FontFamily="Bahnschrift SemiBold SemiCondensed" FontSize="16" Foreground="White" Canvas.Left="135" Canvas.Top="-1"/>
+        </Grid>-->
+
+        <Button x:Name="_btnPrevious" HorizontalAlignment="Left" Margin="86,0,0,0" VerticalAlignment="Center" Width="40" Height="40" Grid.Row="1" TabIndex="2" Click="_btnPrieview_Click" ToolTip="Play previous media in list" Content="{StaticResource Previous}"/>
+        <Button x:Name="_btnPlay" HorizontalAlignment="Left" Margin="131,0,0,0" VerticalAlignment="Center" Width="40" Height="40" Grid.Row="1" TabIndex="1" Click="_btnPlay_Click" ToolTip="Play media" Content="{StaticResource Play}"/>
+        <Button x:Name="_btnNext" HorizontalAlignment="Left" Margin="221,0,0,0" VerticalAlignment="Center" Width="40" Height="40" Grid.Row="1" TabIndex="4" Click="_btnNext_Click" ToolTip="Play next media in list" Content="{StaticResource Next}"/>
+        <Button x:Name="_btnStop" HorizontalAlignment="Left" Margin="176,0,0,0" VerticalAlignment="Center" Width="40" Height="40" Grid.Row="1" TabIndex="3" Click="_btnStop_Click" ToolTip="Stop media" Content="{StaticResource Stop}"/>
+        <Button x:Name="_btnPlaylist" HorizontalAlignment="Left" Margin="80,0,0,0" VerticalAlignment="Center" Width="40" Height="40" Grid.Column="1" Grid.Row="1" TabIndex="5" Click="_btnPlaylistShowHide" ToolTip="Open media file" Content="{StaticResource Playlist}"/>
+        <Button x:Name="_btnOpen" HorizontalAlignment="Left" Margin="125,0,0,0" VerticalAlignment="Center" Width="40" Height="40" Grid.Column="1" Grid.Row="1" TabIndex="5" Click="_btnOpen_Click" ToolTip="Show, hide playlist view" Content="{StaticResource Open}"/>
+        <Button x:Name="_btnUpdate" HorizontalAlignment="Left" Margin="115,0,0,0" VerticalAlignment="Center" Width="40" Height="40" Grid.Column="2" Grid.Row="1" TabIndex="6" Click="_btnUpdate_Click" ToolTip="Update application ..." Content="{StaticResource Update}"/>
+        <Button x:Name="_btnVolumeUp" HorizontalAlignment="Left" Margin="36,0,0,0" VerticalAlignment="Center" Grid.Row="2" Width="20" Height="20" TabIndex="8" Click="_btnVolumeUp_Click" ToolTip="Volume up" Content="{StaticResource VolumeUp}"/>
+        <Button x:Name="_btnMute" HorizontalAlignment="Left" Margin="266,0,0,0" VerticalAlignment="Center" Grid.Row="2" Width="20" Height="20" TabIndex="10" Click="_btnMute_Click" ToolTip="Mute" Content="{StaticResource Unmute}"/>
+        <Button x:Name="_btnVolumeDown" HorizontalAlignment="Left" Margin="61,0,0,0" VerticalAlignment="Center" Grid.Row="2" Width="20" Height="20" TabIndex="9" Click="_btnVolumeDown_Click" ToolTip="Volume down" Content="{StaticResource VolumeDown}" />
+        <Button x:Name="_btnOptions" HorizontalAlignment="Right" Margin="0,0,30,0" VerticalAlignment="Center" Width="40" Height="40" Grid.Column="2" TabIndex="7" Click="_btnOptions_Click" ToolTip="Options" Content="{StaticResource Options}" Grid.Row="1"/>
+        <Button x:Name="_btnHideControlBar" HorizontalAlignment="Right" Margin="0,5,32,0" VerticalAlignment="Top" Width="24" Height="22" Grid.Column="2" TabIndex="7" Click="_btnHideControlBar_Click" ToolTip="Options" Content="{StaticResource OpenContainer}"/>
+        <Button x:Name="_btnCloseApp" HorizontalAlignment="Right" Margin="0,5,5,0" VerticalAlignment="Top" Width="24" Height="22" Grid.Column="2" TabIndex="7" Click="_btnCloseApp_Click" ToolTip="Close control bar" Content="{StaticResource CloseX}" Background="Red" BorderBrush="Red"/>
+        <Button x:Name="_btnOpenAi" HorizontalAlignment="Left" VerticalAlignment="Center" Width="40" Height="40" Grid.Row="1" TabIndex="4" ToolTip="Run open ai client" Content="{StaticResource OpenAi}" Grid.Column="1"/>
+        <Button x:Name="_btnInfo" HorizontalAlignment="Left" VerticalAlignment="Center" Width="40" Height="40" Grid.Row="1" TabIndex="4" Click="_btnInfo_Click" ToolTip="Information about ..." Content="{StaticResource Info}" Grid.Column="2" Margin="32,0,0,0"/>
+
+        <local:ControlProgressBar x:Name="_volumeProgressBar" Grid.Row="2" VerticalAlignment="Center" Height="20" Margin="86,0,86,0" ProgressText="0 volume ..." Maximum="100" FontSize="16" FontFamily="Bahnschrift SemiBold Condensed" BorderBrush="Black"/>
+        <Label x:Name="_timer" Content="Media Element Label" HorizontalAlignment="Left" VerticalAlignment="Top" Width="429" Height="28" Foreground="White" FontSize="14" Grid.ColumnSpan="2" Margin="10,8,0,0" Grid.Row="2" Grid.Column="1" RenderTransformOrigin="0.5,0.5" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
+            <Label.RenderTransform>
+                <TransformGroup>
+                    <ScaleTransform/>
+                    <SkewTransform AngleY="0.514"/>
+                    <RotateTransform/>
+                    <TranslateTransform Y="2.468"/>
+                </TransformGroup>
+            </Label.RenderTransform>
+        </Label>
+        <Button x:Name="_btnSubtitle" HorizontalAlignment="Left" Margin="170,0,0,0" VerticalAlignment="Center" Width="40" Height="40" Grid.Column="1" Grid.Row="1" TabIndex="6" Click="_btnSubtitle_Click" ToolTip="Open subtitles" Content="{StaticResource Subtitles}"/>
+        <Button x:Name="_btnVideoEditor" HorizontalAlignment="Left" HorizontalContentAlignment="Center" VerticalContentAlignment="Bottom" Margin="300,0,0,0" VerticalAlignment="Center" Width="40" Height="40" Grid.Row="1" TabIndex="6" Click="_btnVideoEdit_Click" ToolTip="Edit video" Content="{StaticResource VideoEdit}"/>
+
+    </Grid>
+</UserControl>

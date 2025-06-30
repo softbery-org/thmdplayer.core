@@ -1,0 +1,24 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.2.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThmdPlayer.Core", "ThmdPlayer.Core.csproj", "{540345C0-E860-4722-B326-944AD161ABB5}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{540345C0-E860-4722-B326-944AD161ABB5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{540345C0-E860-4722-B326-944AD161ABB5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{540345C0-E860-4722-B326-944AD161ABB5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{540345C0-E860-4722-B326-944AD161ABB5}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {404214A5-D749-4B9C-A597-B70F995B44F5}
+	EndGlobalSection
+EndGlobal

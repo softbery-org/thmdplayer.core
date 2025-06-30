@@ -1,0 +1,357 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data.Common;
+using System.Linq;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Data;
+using System.Windows.Input;
+using System.Windows.Media;
+using ThmdPlayer.Library.Interfaces;
+using ThmdPlayer.Library.Medias;
+using ThmdPlayer.Softbery.Controls;
+
+namespace ThmdPlayer.Library.Controls
+{
+    public partial class PlaylistView : ListView
+    {
+        /// <summary>
+        /// Tracks the current index of media item in the playlist
+        /// </summary>
+        private int _currentIndex = 0;
+
+        /// <summary>
+        /// Shared playlist storage across all instances (Note: Static implementation)
+        /// </summary>
+        private Playlist _playlist = new Playlist();
+
+        /// <summary>
+        /// Event for requesting playlist data
+        /// </summary>
+        private static event Action GetPlaylist;
+
+        /// <summary>
+        /// Event triggered when playlist contents change
+        /// </summary>
+        private static event Action PlaylistChanged;
+
+        private IPlayer _player;
+        private PlaylistContextMenu _contextMenu;
+        private Point _mouseClickPoint = new Point();
+        private bool _leftEdge = false;
+        private bool _rightEdge = false;
+        private bool _topEdge = false;
+        private bool _bottomEdge = false;
+        private bool _middle = false;
+        private GridView _gridView = new GridView();
+        private List<GridViewColumn> _columns = new List<GridViewColumn>();
+
+        /// <summary>
+        /// Event for property change notifications
+        /// </summary>
+        public static event PropertyChangedEventHandler PropertyChanged;
+
+        public int CurrentIndex
+        {
+            get
+            {
+                if (_currentIndex >= this.Items.Count) _currentIndex = 0;
+                if (_currentIndex < 0) _currentIndex = this.Items.Count - 1;
+                return _currentIndex;
+            }
+            set => _currentIndex = value;
+        }
+
+        /// <summary>
+        /// Gets next index with wrap-around
+        /// </summary>
+        public int NextIndex => _currentIndex == this.Items.Count - 1 ? 0 : _currentIndex + 1;
+
+        /// <summary>
+        /// Gets previous index with wrap-around
+        /// </summary>
+        public int PreviousIndex => _currentIndex == 0 ? this.Items.Count - 1 : _currentIndex - 1;
+
+        /// <summary>
+        /// Gets next media item
+        /// </summary>
+        public Media Next => GetMediaFromListItem(_playlist.Items[NextIndex] as ListViewItem);
+
+        /// <summary>
+        /// Gets previous media item
+        /// </summary>
+        public Media Previous => GetMediaFromListItem(_playlist.Items[PreviousIndex] as ListViewItem);
+
+        /// <summary>
+        /// Moves to and returns next media item
+        /// </summary>
+        public Media MoveNext
+        {
+            get
+            {
+                _currentIndex = NextIndex;
+                return GetMediaFromListItem(_playlist.Items[NextIndex] as ListViewItem);
+            }
+        }
+
+        /// <summary>
+        /// Moves to and returns previous media item
+        /// </summary>
+        public Media MovePrevious
+        {
+            get
+            {
+                _currentIndex = PreviousIndex;
+                return GetMediaFromListItem(_playlist.Items[NextIndex] as ListViewItem);
+            }
+        }
+
+        /// <summary>
+        /// Gets current media item
+        /// </summary>
+        public Media Current => GetMediaFromListItem(this.Items[CurrentIndex] as ListViewItem);
+
+        public new System.Windows.Media.SolidColorBrush Background { get; set; } = new System.Windows.Media.SolidColorBrush(new System.Windows.Media.Color() { A = 95, R = 25, G = 55, B = 15 });
+
+        public GridView GridView
+        {
+            get => _gridView;
+        }
+
+        public Media this[int id]
+        {
+            get => this.Items[id] as Media;
+            set => this.Items[id] = value;
+        }
+
+        public PlaylistView()
+        {
+            // Default PlaylistView columns
+            //DefaultMediaColumns();
+
+            _contextMenu = new PlaylistContextMenu();
+
+            this.Width = 300;
+            this.Height = 200;
+            this.MinWidth = 150;
+            this.MinHeight = 100;
+
+            this.Background = new SolidColorBrush(new Color() { A = 164, R = 25, G = 55, B = 15 });
+
+            this.ScrollIntoView(this);
+            this.BorderThickness = new Thickness(2);
+
+            this.HorizontalAlignment = HorizontalAlignment.Left;
+            this.VerticalAlignment = VerticalAlignment.Top;
+
+            this.MouseDown += Library.Helpers.SizeingMouseEventsHelper.OnControlMouseDown;
+            this.MouseUp += Library.Helpers.SizeingMouseEventsHelper.OnControlMouseUp;
+            this.MouseMove += Library.Helpers.SizeingMouseEventsHelper.OnControlMouseMove;
+
+            PlaylistChanged += OnPlaylistChanged;
+            GetPlaylist += OnGetPlaylist;
+        }
+
+        public PlaylistView(params object[] Medias) : this()
+        {
+            try
+            {
+                this.Add(Medias);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+        }
+
+        public void SetPlayer(IPlayer player)
+        {
+            _player = player;
+        }
+
+        public void SetGridColumns(string[] columns)
+        {
+            _gridView = new GridView();
+
+            foreach (var item in columns)
+            {
+                GridViewColumn column = new GridViewColumn();
+                column.Header = item;
+                column.DisplayMemberBinding = new Binding(item);
+
+                this._gridView.Columns.Add(column);
+            }
+
+            this.View = this.GridView;
+        }
+
+        /*private void DefaultMediaColumns()
+        {
+            GridViewColumn duration = new GridViewColumn();
+            duration.Header = "Duration";
+            duration.DisplayMemberBinding = new Binding("Duration");
+
+            GridViewColumn position = new GridViewColumn();
+            position.Header = "PositionChange";
+            position.DisplayMemberBinding = new Binding("PositionChange");
+
+            GridViewColumn media_type = new GridViewColumn();
+            media_type.Header = "media type";
+            media_type.DisplayMemberBinding = new Binding("MediaType");
+
+            GridViewColumn title = new GridViewColumn();
+            title.Header = "Title";
+            title.DisplayMemberBinding = new Binding("Name");
+
+            this.GridView.Columns.Add(duration);
+            this.GridView.Columns.Add(position);
+            this.GridView.Columns.Add(title);
+            this.GridView.Columns.Add(media_type);
+
+            this.View = this.GridView;
+        }*/
+
+        private ListViewItem CreateListItem(Media media)
+        {
+            var item = new ListViewItem();
+            item.Content = media;
+            item.MouseDoubleClick += OnPlaylistItemMouseDoubleClick;
+            item.MouseDown += OnListItemMouseClick;
+
+            return item;
+        }
+
+        private Media GetMediaFromListItem(ListViewItem item)
+        {
+            var media = item.Content as Media;
+            return media;
+        }
+
+        private void OnPlaylistChanged()
+        {
+            if (PlaylistChanged != null)
+            {
+                PlaylistChanged?.Invoke();
+            }
+        }
+
+        private void OnGetPlaylist()
+        {
+            _playlist = (Playlist)this.ItemsSource.Cast<Playlist>();
+        }
+
+        private static void OnPropertyChanged<T>(string propertyName, ref T field, T value)
+        {
+            if ((field == null && value != null) || (field != null && !field.Equals(value)))
+            {
+                field = value;
+                PropertyChanged?.Invoke(field, new PropertyChangedEventArgs(propertyName));
+            }
+        }
+
+        private void OnPlaylistItemMouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            if (this.SelectedItem != null)
+            {
+                var item = this.SelectedItem as ListViewItem;
+                var media = GetMediaFromListItem(item);
+                _player.Media = media;
+                _player.Play(media);
+                _currentIndex = this.SelectedIndex;
+            }
+        }
+
+        private void OnListItemMouseClick(object sender, MouseButtonEventArgs e)
+        {
+            if (this.SelectedItem != null && e.RightButton == MouseButtonState.Pressed)
+            {
+                OnRightMouseClickOnListItem();
+            }
+        }
+
+        private void OnRightMouseClickOnListItem()
+        {
+            var media = this.SelectedItem as Media;
+            _contextMenu = new PlaylistContextMenu();
+
+            _contextMenu.Items.Clear();
+            _contextMenu.Items.Add("Media");
+
+        }
+
+        private void OnControlClose(object sender, RoutedEventArgs e)
+        {
+            this.Visibility = Visibility.Collapsed;
+        }
+
+        /// <summary>
+        /// Clears all media items
+        /// </summary>
+        public void ClearTracks()
+        {
+            this.Items.Clear();
+        }
+
+        /// <summary>
+        /// Checks if playlist contains media item
+        /// </summary>
+        /// <param name="media">media item to check</param>
+        /// <returns>True if item exists</returns>
+        public bool Contains(Media media)
+        {
+            return this.Items.Contains(media);
+        }
+
+        /// <summary>
+        /// Removes media item from playlist
+        /// </summary>
+        /// <param name="media">media item to remove</param>
+        /// <returns>Removed media item</returns>
+        public Media Remove(Media media)
+        {
+            Items.Remove(media);
+            return media;
+        }
+
+        /// <summary>
+        /// Creates new empty playlist
+        /// </summary>
+        /// <remarks>
+        /// Currently ignores name and description parameters
+        /// </remarks>
+        /// <param name="name">PlaylistView name (unused)</param>
+        /// <param name="description">PlaylistView description (unused)</param>
+        public void New(string name, string description)
+        {
+            ClearTracks();
+        }
+
+        public void Add(Media media)
+        {
+            var m = media;
+            _currentIndex++;
+            Items.Add(CreateListItem(m));
+        }
+
+        public void Add(Media[] medias)
+        {
+            foreach (var media in medias)
+            {
+                var m = media;
+                _currentIndex++;
+                Items.Add(CreateListItem(m));
+            }
+        }
+
+        public void Add(params object[] medias)
+        {
+            foreach (var media in medias)
+            {
+                var m = media as Media;
+                _currentIndex++;
+                Items.Add(CreateListItem(m));
+            }
+        }
+}
+}
